@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "251194023667",
+    "firebase_url": "https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "smartfarming-greenhouse",
+    "storage_bucket": "smartfarming-greenhouse.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251194023667:android:d334becc8d52aa8794a186",
+        "android_client_info": {
+          "package_name": "com.alfanshter.agrogonta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUNP9Xo9RJO5UF02IbPC6p4udpb2XZnlg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251194023667:android:3304203a350d433094a186",
+        "android_client_info": {
+          "package_name": "com.ptpws.agrogonta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUNP9Xo9RJO5UF02IbPC6p4udpb2XZnlg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251194023667:android:702a8a7d7821116b94a186",
+        "android_client_info": {
+          "package_name": "com.ptpws.agrogontafarm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUNP9Xo9RJO5UF02IbPC6p4udpb2XZnlg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

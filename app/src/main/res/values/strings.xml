@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">AgroGonta</string>
+    <string name="title_activity_auth">AuthActivity</string>
+    <string name="splashscreen">SplashScreen</string>
+    <string name="login">Login</string>
+    <string name="home">Home</string>
+    <string name="control">Control</string>
+    <string name="profil">Profil</string>
+    <string name="back">Kembali</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="log">Log</string>
+    <string name="logout">Logout</string>
+    <string name="penyiraman">Penyiraman</string>
+</resources>
