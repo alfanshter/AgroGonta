@@ -62,9 +62,21 @@ open class PenyiramanRepository @Inject constructor() {
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
         val ref = db.reference.child("AgroGonta").child("gh1").child("penyiraman").child(data)
 
+        //set 0 all selenoid
+        val saluranRef = db.reference.child("AgroGonta").child("gh1").child("saluran")
+        val penyiramanRef = db.reference.child("AgroGonta").child("gh1").child("penyiraman")
+        val targetRef = penyiramanRef.child(data)
+
 
         return try {
-            val result = ref.setValue(nilai).await()
+            when (data) {
+                "baris1" -> penyiramanRef.child("baris2").setValue(0).await()
+                "baris2" -> penyiramanRef.child("baris1").setValue(0).await()
+            }
+            saluranRef.child("tandon_a").setValue(0).await()
+            saluranRef.child("tandon_b").setValue(0).await()
+
+            targetRef.setValue(nilai).await()
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -116,11 +128,20 @@ open class PenyiramanRepository @Inject constructor() {
     open suspend fun setSaluran(data: String, nilai: Int) : Resource<Unit> {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
-        val ref = db.reference.child("AgroGonta").child("gh1").child("saluran").child(data)
-
+        //set 0 all selenoid
+        val saluranRef = db.reference.child("AgroGonta").child("gh1").child("saluran")
+        val penyiramanRef = db.reference.child("AgroGonta").child("gh1").child("penyiraman")
+        val targetRef = saluranRef.child(data)
 
         return try {
-            val result = ref.setValue(nilai).await()
+            when (data) {
+                "tandon_a" -> saluranRef.child("tandon_b").setValue(0).await()
+                "tandon_b" -> saluranRef.child("tandon_a").setValue(0).await()
+            }
+            penyiramanRef.child("baris1").setValue(0).await()
+            penyiramanRef.child("baris2").setValue(0).await()
+
+            targetRef.setValue(nilai).await()
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")

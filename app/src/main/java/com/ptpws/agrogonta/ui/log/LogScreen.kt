@@ -988,7 +988,7 @@ fun setpengaduk(ghViewModel: GhViewModel, checked: Boolean) {
 }
 
 fun setSaluran(ghViewModel: GhViewModel, checked: Boolean) {
-    ghViewModel.setSaluran("tandon", if (checked == true) 1 else 0)
+    ghViewModel.setSaluran("tandon_a", if (checked == true) 1 else 0)
 }
 
 @Composable
