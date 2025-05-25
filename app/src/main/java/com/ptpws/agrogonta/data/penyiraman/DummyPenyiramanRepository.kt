@@ -1,5 +1,7 @@
 package com.ptpws.agrogonta.data.penyiraman
 
+import com.ptpws.agrogonta.data.models.WeatherResponse
+import com.ptpws.agrogonta.data.repo.WeatherRepository
 import com.ptpws.agrogontafarm.data.Resource
 import com.ptpws.agrogontafarm.data.models.GhModel
 import com.ptpws.agrogontafarm.data.models.PengadukModel
@@ -48,4 +50,6 @@ class DummyPenyiramanRepository : PenyiramanRepository() {
         // Dummy response untuk setSaluran
         return Resource.Success(Unit)
     }
+
+
 }

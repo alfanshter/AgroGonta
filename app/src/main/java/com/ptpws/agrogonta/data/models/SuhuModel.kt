@@ -1,5 +1,5 @@
 package com.ptpws.agrogontafarm.data.models
 
 data class SuhuModel(
-    val nilai : Int = 0
+    val suhu1 : Int = 0
 )

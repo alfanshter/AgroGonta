@@ -74,6 +74,7 @@ fun LogScreen(ghViewModel: GhViewModel, navController: NavController) {
     val showBottomSheet = remember { mutableStateOf(false) }
     val sheetPengaduk = remember { mutableStateOf(false) }
     val sheetSaluran = remember { mutableStateOf(false) }
+    val sheetFlushingBaris1 = remember { mutableStateOf(false) }
 
     val currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
@@ -349,7 +350,8 @@ fun LogScreen(ghViewModel: GhViewModel, navController: NavController) {
                             Column(Modifier.clickable {
                                 sheetPengaduk.value = true
 
-                            }) {
+                            })
+                            {
                                 Row(
 
                                     verticalAlignment = Alignment.CenterVertically,
@@ -368,6 +370,100 @@ fun LogScreen(ghViewModel: GhViewModel, navController: NavController) {
                                                 start = 12.dp,
                                             ),
                                             text = "Pengaduk",
+                                            fontFamily = poppinsFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                            color = Color.DarkGray, textAlign = TextAlign.Center
+                                        )
+                                    }
+
+                                    Image(
+                                        painter = painterResource(id = R.drawable.iconback),
+                                        contentDescription = null,
+                                        modifier = Modifier.rotate(degrees = 180f)
+                                    )
+
+
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Divider(thickness = 1.dp)
+
+
+                            }
+
+                            //Flushing
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Column(Modifier.clickable {
+                                navController.navigate(AppScreen.Flushing.route)
+
+                            })
+                            {
+                                Row(
+
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+
+                                ) {
+                                    Row {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.iconpengaduk),
+                                            contentDescription = null
+                                        )
+                                        Text(
+                                            modifier = Modifier.padding(
+                                                start = 12.dp,
+                                            ),
+                                            text = "Flushing",
+                                            fontFamily = poppinsFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                            color = Color.DarkGray, textAlign = TextAlign.Center
+                                        )
+                                    }
+
+                                    Image(
+                                        painter = painterResource(id = R.drawable.iconback),
+                                        contentDescription = null,
+                                        modifier = Modifier.rotate(degrees = 180f)
+                                    )
+
+
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Divider(thickness = 1.dp)
+
+
+                            }
+
+                            //CCTV
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Column(Modifier.clickable {
+                                sheetPengaduk.value = true
+
+                            })
+                            {
+                                Row(
+
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+
+                                ) {
+                                    Row {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.iconpengaduk),
+                                            contentDescription = null
+                                        )
+                                        Text(
+                                            modifier = Modifier.padding(
+                                                start = 12.dp,
+                                            ),
+                                            text = "CCTV",
                                             fontFamily = poppinsFamily,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 16.sp,
@@ -636,7 +732,6 @@ fun KontrolPenyiraman(
 
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KontrolPengaduk(
@@ -878,9 +973,20 @@ fun KontrolSaluran(
 
                 Spacer(modifier = Modifier.height(17.dp))
 
+
                 waktuBerjalan(checked, ghViewModel)
 
-                Spacer(modifier = Modifier.height(65.dp))
+                Text(
+                    text = "Water level 30% - Sedikit",
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = poppinsFamily,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 57.dp),
+                )
                 Text(
                     text = "Lihat tips budidaya",
                     color = Color(0xff0C9359),
@@ -991,6 +1097,16 @@ fun setSaluran(ghViewModel: GhViewModel, checked: Boolean) {
     ghViewModel.setSaluran("tandon_a", if (checked == true) 1 else 0)
 }
 
+fun setFlushingBaris1(ghViewModel: GhViewModel, checked: Boolean) {
+    ghViewModel.setFlushing("baris1", if (checked == true) 1 else 0)
+}
+
+fun setFlushingBaris2(ghViewModel: GhViewModel, checked: Boolean) {
+    ghViewModel.setFlushing("baris2", if (checked == true) 1 else 0)
+}
+
+
+
 @Composable
 fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60
@@ -1015,4 +1131,6 @@ fun KontrolPenyiramanPrev() {
     val dummyModel = GhViewModel(DummyPenyiramanRepository())
     KontrolPenyiraman(ghViewModel = dummyModel, showBottomSheet = remember { mutableStateOf(true) })
 }
+
+
 

@@ -83,6 +83,37 @@ open class PenyiramanRepository @Inject constructor() {
         }
     }
 
+    open suspend fun setFlushing(data: String, nilai: Int) : Resource<Unit> {
+        val db =
+            FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
+        val ref = db.reference.child("AgroGonta").child("gh1").child("flushing").child(data)
+
+        //set 0 all selenoid
+        val saluranRef = db.reference.child("AgroGonta").child("gh1").child("saluran")
+        val penyiramanRef = db.reference.child("AgroGonta").child("gh1").child("penyiraman")
+        val flushingRef = db.reference.child("AgroGonta").child("gh1").child("flushing")
+        val targetRef = flushingRef.child(data)
+
+
+        return try {
+            when (data) {
+                "baris1" -> flushingRef.child("baris2").setValue(0).await()
+                "baris2" -> flushingRef.child("baris1").setValue(0).await()
+            }
+            //turn off saluran pengisian tandon
+            saluranRef.child("tandon_a").setValue(0).await()
+            saluranRef.child("tandon_b").setValue(0).await()
+            //turn off saluran penyiraman
+            penyiramanRef.child("baris1").setValue(0).await()
+            penyiramanRef.child("baris2").setValue(0).await()
+
+            targetRef.setValue(nilai).await()
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "An error occurred")
+        }
+    }
+
 
     open suspend fun getGh() {
         val db =

@@ -4,5 +4,6 @@ data class GhModel(
     val pengadukModel: PengadukModel = PengadukModel(),
     val saluranmodel: SaluranModel = SaluranModel(),
     val penyiramanModel: PenyiramanModel = PenyiramanModel(),
-    val suhuModel: SuhuModel = SuhuModel()
+    val suhu: SuhuModel = SuhuModel(),
+    val kelembapan: KelembapanModel = KelembapanModel()
 )

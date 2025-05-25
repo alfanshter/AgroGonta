@@ -24,6 +24,10 @@ class GhViewModel @Inject constructor(
     private val _setPenyiraman = MutableStateFlow<Resource<Unit>?>(null)
     val setPenyiraman: StateFlow<Resource<Unit>?> = _setPenyiraman
 
+    private val _setFlushing = MutableStateFlow<Resource<Unit>?>(null)
+    val setFlushing: StateFlow<Resource<Unit>?> = _setFlushing
+
+
     private val _setPengaduk = MutableStateFlow<Resource<Unit>?>(null)
     val setPengaduk: StateFlow<Resource<Unit>?> = _setPengaduk
 
@@ -59,6 +63,13 @@ class GhViewModel @Inject constructor(
         val result = penyiramanRepository.setSaluran(data,nilai)
         _setSaluran.value = result
     }
+
+    fun setFlushing(data : String, nilai : Int) = viewModelScope.launch {
+        _setFlushing.value = Resource.Loading
+        val result = penyiramanRepository.setFlushing(data,nilai)
+        _setFlushing.value = result
+    }
+
 
 
 

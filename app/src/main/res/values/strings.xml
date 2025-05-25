@@ -12,4 +12,5 @@
     <string name="log">Log</string>
     <string name="logout">Logout</string>
     <string name="penyiraman">Penyiraman</string>
+    <string name="flushing">Flushing</string>
 </resources>

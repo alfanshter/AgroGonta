@@ -19,6 +19,7 @@ sealed class AppScreen(@StringRes val title: Int, @DrawableRes val icon: Int, va
     }
 
     object Penyiraman : AppScreen(R.string.penyiraman, R.drawable.iconlog, "penyiraman")
+    object Flushing : AppScreen(R.string.flushing, R.drawable.iconlog, "flushing")
 
 
     object Control : AppScreen(R.string.control, R.drawable.iconlog, "control")

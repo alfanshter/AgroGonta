@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ptpws.agrogonta.ui.log.flushing.FlushingScreen
 import com.ptpws.agrogonta.ui.log.penyiraman.PenyiramanScreen
 import com.ptpws.agrogontafarm.R
 import com.ptpws.agrogontafarm.ui.AppScreen
@@ -56,6 +57,7 @@ fun MyBottomAppBar() {
     val selected = remember {
         mutableStateOf(Icons.Default.Home)
     }
+
 
     Scaffold(
         bottomBar = {
@@ -122,9 +124,10 @@ fun MyBottomAppBar() {
             startDestination = AppScreen.Home.Dashboard.route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(AppScreen.Home.Dashboard.route) { HomeScreen() }
+            composable(AppScreen.Home.Dashboard.route) { HomeScreen(homeViewModel = hiltViewModel(),navigationController) }
             composable(AppScreen.Home.Log.route) { LogScreen(ghViewModel = hiltViewModel(), navigationController) }
             composable(AppScreen.Penyiraman.route) { PenyiramanScreen(penyiramanViewModel = hiltViewModel()) }
+            composable(AppScreen.Flushing.route) { FlushingScreen(penyiramanViewModel = hiltViewModel()) }
             composable(AppScreen.Home.Profil.route) { ProfilScreen(authViewModel = hiltViewModel()) }
 //            profilNav(navigationController )
 

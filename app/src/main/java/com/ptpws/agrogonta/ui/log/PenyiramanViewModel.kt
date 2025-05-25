@@ -26,6 +26,9 @@ class PenyiramanViewModel @Inject constructor(
     private val _setPenyiraman = MutableStateFlow<Resource<Unit>?>(null)
     val setPenyiraman: StateFlow<Resource<Unit>?> = _setPenyiraman
 
+    private val _setFlushing = MutableStateFlow<Resource<Unit>?>(null)
+    val setFlushing: StateFlow<Resource<Unit>?> = _setFlushing
+
     private val _modePenyiraman = MutableStateFlow<Resource<String>>(Resource.Loadings())
     val modePenyiraman: StateFlow<Resource<String>> get() = _modePenyiraman
 
@@ -77,6 +80,11 @@ class PenyiramanViewModel @Inject constructor(
         _setPenyiramanOtomatis.value = result
     }
 
+    fun setflushing(data : String, nilai : Int) = viewModelScope.launch {
+        _setFlushing.value = Resource.Loading
+        val result = penyiramanRepository.setFlushing(data,nilai)
+        _setFlushing.value = result
+    }
     // Fungsi untuk memanggil `getMode()` di repository
     fun fetchModePenyiraman() {
         viewModelScope.launch {

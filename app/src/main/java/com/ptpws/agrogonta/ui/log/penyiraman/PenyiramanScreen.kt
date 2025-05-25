@@ -319,9 +319,74 @@ fun PenyiramanScreen(penyiramanViewModel: PenyiramanViewModel) {
 
                     }
                 }
+
+//                Card(
+//                    shape = RoundedCornerShape(12.dp),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(start = 30.dp, end = 30.dp, top = 20.dp),
+//                    colors = CardDefaults.cardColors(containerColor = Color.White),
+//                    elevation = CardDefaults.cardElevation(10.dp)
+//                ) {
+//                    Row(
+//                        horizontalArrangement = Arrangement.SpaceBetween,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        modifier = Modifier
+//                            .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
+//                            .fillMaxWidth()
+//                    ) {
+//                        Text(
+//                            text = "Kontrol Kran 2",
+//                            color = Color.Black,
+//                            fontSize = 16.sp,
+//                            fontFamily = poppinsFamily,
+//                            fontWeight = FontWeight.Bold,
+//                            textAlign = TextAlign.Center,
+//                            modifier = Modifier.clickable {
+//                                penyiramanViewModel.setsiram("baris2", 1)
+//
+//                            }
+//                        )
+//
+//                        Divider(
+//                            thickness = 1.dp, modifier = Modifier
+//                                .rotate(90f)
+//                                .width(40.dp)
+//                                .padding(vertical = 16.dp)
+//                        )
+//
+//                        //baris 1
+//                        Switch(
+//                            colors = SwitchDefaults.colors(
+//                                checkedThumbColor = colorResource(id = R.color.white),
+//                                checkedTrackColor = colorResource(id = R.color.hijau),
+//                                uncheckedThumbColor = colorResource(id = R.color.white),
+//                                uncheckedTrackColor = Color.LightGray,
+//                            ),
+//                            checked = isKran2On,
+//                            onCheckedChange = {
+//                                isKran2On = it
+//                            },
+//                            thumbContent = if (isKran2On) {
+//                                {
+//                                    Icon(
+//                                        imageVector = Icons.Filled.Check,
+//                                        contentDescription = null,
+//                                        modifier = Modifier
+//                                            .size(SwitchDefaults.IconSize)
+//                                    )
+//                                }
+//                            } else {
+//                                null
+//                            }
+//                        )
+//
+//                        setsiram(penyiramanViewModel, isKran2On)
+//
+//                    }
+//                }
                 Spacer(modifier = Modifier.height(17.dp))
             waktuBerjalan(isKranOn, penyiramanViewModel)
-
 //            waktuBerjalan(isKran2On, penyiramanViewModel)
 
             }
