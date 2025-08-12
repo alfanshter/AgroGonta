@@ -22,7 +22,7 @@ class DummyPenyiramanRepository : PenyiramanRepository(mockContext()) {
     ))
 
     // Override semua fungsi untuk memberikan hasil dummy
-    override suspend fun getPenyiraman() {
+    suspend fun getPenyiraman() {
         // Gantilah implementasi Firebase dengan data dummy
         val dummyData = PenyiramanModel(0,0)
         _penyiraman.emit(dummyData)

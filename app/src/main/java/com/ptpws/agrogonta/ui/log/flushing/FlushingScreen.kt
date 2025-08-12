@@ -77,7 +77,6 @@ import java.util.Locale
 fun FlushingScreen(penyiramanViewModel: PenyiramanViewModel) {
 
 
-    val penyiraman by penyiramanViewModel.gh.collectAsState()
 
 
     val context = LocalContext.current
@@ -110,206 +109,198 @@ fun FlushingScreen(penyiramanViewModel: PenyiramanViewModel) {
     //dialog error
     val errorState = rememberDialogState()
 
-    val penyiramanOtomatisState by penyiramanViewModel.penyiramanOtomatis.collectAsState()
-    val isRefreshing by penyiramanViewModel.isRefreshing.collectAsState() // State untuk loading
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+//    val penyiramanOtomatisState by penyiramanViewModel.penyiramanOtomatis.collectAsState()
+//    val isRefreshing by penyiramanViewModel.isRefreshing.collectAsState() // State untuk loading
+//    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
 
-    SwipeRefresh(
-        state = swipeRefreshState,
-        onRefresh = { penyiramanViewModel.refreshData()
-        schedules.clear()
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White)
     ) {
-        Column(
+        // Sheet content
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(
+            text = "Pengaturan Flushing",
+            color = Color.Black,
+            fontSize = 25.sp,
+            fontFamily = poppinsFamily,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+
+        ErrorDialog(errorState, {
+            errorState.visible = false
+        },error = "Gagal ubah mode", text = "Terjadi kesalahan saat update mode. Coba lagi nanti.")
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(
+            text = "Kontrol Flushing Manual",
+            color = Color(0xff0C9359),
+            fontSize = 18.sp,
+            fontFamily = poppinsFamily,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
             modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.White)
+                .fillMaxWidth(),
+        )
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 30.dp, end = 30.dp, top = 20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(10.dp)
         ) {
-            // Sheet content
-            Spacer(modifier = Modifier.height(30.dp))
-            Text(
-                text = "Pengaturan Flushing",
-                color = Color.Black,
-                fontSize = 25.sp,
-                fontFamily = poppinsFamily,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-
-            ErrorDialog(errorState, {
-                errorState.visible = false
-            },error = "Gagal ubah mode", text = "Terjadi kesalahan saat update mode. Coba lagi nanti.")
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Spacer(modifier = Modifier.height(30.dp))
-            Text(
-                text = "Kontrol Flushing Manual",
-                color = Color(0xff0C9359),
-                fontSize = 18.sp,
-                fontFamily = poppinsFamily,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .fillMaxWidth(),
-            )
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
+                    .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
                     .fillMaxWidth()
-                    .padding(start = 30.dp, end = 30.dp, top = 20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(10.dp)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Kontrol Baris 1",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontFamily = poppinsFamily,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.clickable {
-                            penyiramanViewModel.setflushing("baris1", 1)
+                Text(
+                    text = "Kontrol Baris 1",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontFamily = poppinsFamily,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.clickable {
+//                            penyiramanViewModel.setflushing("baris1", 1)
 
+                    }
+                )
+
+                Divider(
+                    thickness = 1.dp, modifier = Modifier
+                        .rotate(90f)
+                        .width(40.dp)
+                        .padding(vertical = 16.dp)
+                )
+
+                //baris 1
+                Switch(
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = colorResource(id = R.color.white),
+                        checkedTrackColor = colorResource(id = R.color.hijau),
+                        uncheckedThumbColor = colorResource(id = R.color.white),
+                        uncheckedTrackColor = Color.LightGray,
+                    ),
+                    checked = isKranOn,
+                    onCheckedChange = {
+                        isKranOn = it
+                    },
+                    thumbContent = if (isKranOn) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(SwitchDefaults.IconSize)
+                            )
                         }
-                    )
+                    } else {
+                        null
+                    }
+                )
 
-                    Divider(
-                        thickness = 1.dp, modifier = Modifier
-                            .rotate(90f)
-                            .width(40.dp)
-                            .padding(vertical = 16.dp)
-                    )
+                setFlushing(penyiramanViewModel, isKranOn)
 
-                    //baris 1
-                    Switch(
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = colorResource(id = R.color.white),
-                            checkedTrackColor = colorResource(id = R.color.hijau),
-                            uncheckedThumbColor = colorResource(id = R.color.white),
-                            uncheckedTrackColor = Color.LightGray,
-                        ),
-                        checked = isKranOn,
-                        onCheckedChange = {
-                            isKranOn = it
-                        },
-                        thumbContent = if (isKranOn) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Filled.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(SwitchDefaults.IconSize)
-                                )
-                            }
-                        } else {
-                            null
-                        }
-                    )
-
-                    setFlushing(penyiramanViewModel, isKranOn)
-
-                }
             }
-
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 30.dp, end = 30.dp, top = 20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(10.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Kontrol Baris 1=2",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontFamily = poppinsFamily,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.clickable {
-                            penyiramanViewModel.setflushing("baris2", 1)
-
-                        }
-                    )
-
-                    Divider(
-                        thickness = 1.dp, modifier = Modifier
-                            .rotate(90f)
-                            .width(40.dp)
-                            .padding(vertical = 16.dp)
-                    )
-
-                    //baris 1
-                    Switch(
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = colorResource(id = R.color.white),
-                            checkedTrackColor = colorResource(id = R.color.hijau),
-                            uncheckedThumbColor = colorResource(id = R.color.white),
-                            uncheckedTrackColor = Color.LightGray,
-                        ),
-                        checked = isKran2On,
-                        onCheckedChange = {
-                            isKran2On = it
-                        },
-                        thumbContent = if (isKran2On) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Filled.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(SwitchDefaults.IconSize)
-                                )
-                            }
-                        } else {
-                            null
-                        }
-                    )
-
-                    setFlushing(penyiramanViewModel, isKran2On)
-
-                }
-            }
-            Spacer(modifier = Modifier.height(17.dp))
-            waktuBerjalan(isKranOn, penyiramanViewModel)
-            waktuBerjalan(isKran2On, penyiramanViewModel)
-
-
-
-
-            if (showLoading.value) {
-                LoadingDialog(showDialog = showLoading)
-            }
-
-            Spacer(modifier = Modifier.height(65.dp))
-
-
         }
-    }
 
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 30.dp, end = 30.dp, top = 20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(10.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Kontrol Baris 1=2",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontFamily = poppinsFamily,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.clickable {
+//                            penyiramanViewModel.setflushing("baris2", 1)
+
+                    }
+                )
+
+                Divider(
+                    thickness = 1.dp, modifier = Modifier
+                        .rotate(90f)
+                        .width(40.dp)
+                        .padding(vertical = 16.dp)
+                )
+
+                //baris 1
+                Switch(
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = colorResource(id = R.color.white),
+                        checkedTrackColor = colorResource(id = R.color.hijau),
+                        uncheckedThumbColor = colorResource(id = R.color.white),
+                        uncheckedTrackColor = Color.LightGray,
+                    ),
+                    checked = isKran2On,
+                    onCheckedChange = {
+                        isKran2On = it
+                    },
+                    thumbContent = if (isKran2On) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(SwitchDefaults.IconSize)
+                            )
+                        }
+                    } else {
+                        null
+                    }
+                )
+
+                setFlushing(penyiramanViewModel, isKran2On)
+
+            }
+        }
+        Spacer(modifier = Modifier.height(17.dp))
+        waktuBerjalan(isKranOn, penyiramanViewModel)
+        waktuBerjalan(isKran2On, penyiramanViewModel)
+
+
+
+
+        if (showLoading.value) {
+            LoadingDialog(showDialog = showLoading)
+        }
+
+        Spacer(modifier = Modifier.height(65.dp))
+
+
+    }
 }
 
 
 fun setFlushing(penyiramanViewModel: PenyiramanViewModel, checked: Boolean) {
-    penyiramanViewModel.setflushing("baris1", if (checked == true) 1 else 0)
+//    penyiramanViewModel.setflushing("baris1", if (checked == true) 1 else 0)
 }
 
 fun convertTimestamp(time : String) : Long{
@@ -338,47 +329,47 @@ fun convertDurationToMinutesAndSeconds(durationMillis: Long): String {
     return "$minutes menit $seconds detik"
 }
 
-@Preview
-@Composable
-private fun PenyiramanPrev() {
-    val dummyModel = PenyiramanViewModel(DummyPenyiramanRepository())
-    FlushingScreen(dummyModel)
-
-}
+//@Preview
+//@Composable
+//private fun PenyiramanPrev() {
+//    val dummyModel = PenyiramanViewModel(DummyPenyiramanRepository())
+//    FlushingScreen(dummyModel)
+//
+//}
 
 
 
 @Composable
 fun waktuBerjalan(checked: Boolean, penyiramanViewModel: PenyiramanViewModel) {
 
-    val flushingState by penyiramanViewModel.setFlushing.collectAsState()
+//    val flushingState by penyiramanViewModel.setFlushing.collectAsState()
 
     var showLoading = remember { mutableStateOf(true) }
     val context = LocalContext.current
 
-    when (flushingState) {
-
-        is Resource.Loading -> {
-            showLoading.value = true
-
-        }
-
-        is Resource.Success -> {
-            showLoading.value = false
-
-        }
-
-        is Resource.Error -> {
-            showLoading.value = false
-            val message = (flushingState as Resource.Error).message
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-
-        }
-
-        else -> {
-            showLoading.value = false
-        }
-    }
+//    when (flushingState) {
+//
+//        is Resource.Loading -> {
+//            showLoading.value = true
+//
+//        }
+//
+//        is Resource.Success -> {
+//            showLoading.value = false
+//
+//        }
+//
+//        is Resource.Error -> {
+//            showLoading.value = false
+//            val message = (flushingState as Resource.Error).message
+//            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+//
+//        }
+//
+//        else -> {
+//            showLoading.value = false
+//        }
+//    }
 
 
     if (showLoading.value) {

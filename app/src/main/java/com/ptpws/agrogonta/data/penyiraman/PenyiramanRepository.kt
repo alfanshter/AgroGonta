@@ -10,8 +10,6 @@ import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.MqttClientSslConfig
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
-import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient
-import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth
 import com.ptpws.agrogonta.utils.Constant
 import com.ptpws.agrogontafarm.data.Resource
@@ -25,7 +23,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.collections.HashMap
 import kotlin.coroutines.resume
 
 open class PenyiramanRepository @Inject constructor(
@@ -43,6 +40,10 @@ open class PenyiramanRepository @Inject constructor(
 
     private val _lastMessage = MutableStateFlow<String?>(null)
     val lastMessage: StateFlow<String?> get() = _lastMessage
+
+    private val _lastSchedule = MutableStateFlow<String?>(null)
+    val lastSchedule: StateFlow<String?> get() = _lastSchedule
+
 
     val sslConfig = MqttClientSslConfig.builder()
         .hostnameVerifier { _, _ -> true } // Untuk testing, sebaiknya ganti dengan verifikasi aman
@@ -74,6 +75,7 @@ open class PenyiramanRepository @Inject constructor(
                 } else {
                     println("✅ Connected to broker")
                     subscribe(Constant.penyiramanCommand)
+                    subscribe(Constant.jadwalCommand)
                 }
             }
     }
@@ -84,50 +86,53 @@ open class PenyiramanRepository @Inject constructor(
             .qos(MqttQos.AT_LEAST_ONCE)
             .callback { publish ->
                 val payloadString = publish.payloadAsBytes?.decodeToString() ?: ""
-                println("📩 Received from $topic: $payloadString")
-                _lastMessage.value = payloadString // Simpan ke StateFlow
-            }
-            .send()
-    }
+                println("📩 [$topic]: $payloadString")
 
-    fun sendCommand(command: String) {
-        mqttClient.publishWith()
-            .topic(Constant.penyiramanCommand)
-            .qos(MqttQos.AT_LEAST_ONCE)
-            .payload(command.toByteArray())
-            .send()
-    }
-
-
-    open suspend fun getPenyiraman() {
-        val db =
-            FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
-        val ref = db.reference.child("AgroGonta").child("gh1").child("penyiraman")
-        val data = ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val penyiraman = snapshot.getValue(PenyiramanModel::class.java)
-                penyiraman?.let {
-                    runBlocking {
-                        Log.d("dinda", "onDataChange runblocking: $it ")
-                        _penyiraman.emit(it)
-                    }
+                when (topic) {
+                    Constant.penyiramanCommand -> _lastMessage.value = payloadString
+                    Constant.jadwalCommand -> _lastSchedule.value = payloadString
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the error appropriately
-                println("Database error: ${error.message}")
-
-            }
-
-        })
-
-
+            .send()
     }
 
 
+    open suspend fun sendManualCommand(command: String): Resource<Unit> {
+        return try {
+            // Contoh implementasi dengan suspendCoroutine supaya bisa await hasil publish
+            suspendCancellableCoroutine<Resource<Unit>> { cont ->
+                mqttClient.publishWith()
+                    .topic(Constant.penyiramanCommand)
+                    .qos(MqttQos.AT_LEAST_ONCE)
+                    .payload(command.toByteArray())
+                    .send()
+                    .whenComplete { _ , throwable ->
+                        if (throwable != null) {
+                            println("gagal ${throwable.message}")
+                            cont.resume(Resource.Error("Failed to send command: ${throwable.message}"))
+                        } else {
+                            println("berhasil")
+                            cont.resume(Resource.Success(Unit))
+                        }
+                    }
+            }
+        } catch (e: Exception) {
+            println("gagal ${e.message}")
+            Resource.Error(e.message ?: "An error occurred")
+        }
+    }
 
-    open suspend fun setPenyiraman(data: String, nilai: Int) : Resource<Unit> {
+
+    fun sendSchedule(schedule: String) {
+        mqttClient.publishWith()
+            .topic(Constant.jadwalCommand)
+            .qos(MqttQos.AT_LEAST_ONCE)
+            .payload(schedule.toByteArray())
+            .send()
+    }
+
+
+    open suspend fun setPenyiraman(data: String, nilai: Int): Resource<Unit> {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
         val ref = db.reference.child("AgroGonta").child("gh1").child("penyiraman").child(data)
@@ -153,7 +158,7 @@ open class PenyiramanRepository @Inject constructor(
         }
     }
 
-    open suspend fun setFlushing(data: String, nilai: Int) : Resource<Unit> {
+    open suspend fun setFlushing(data: String, nilai: Int): Resource<Unit> {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
         val ref = db.reference.child("AgroGonta").child("gh1").child("flushing").child(data)
@@ -211,7 +216,7 @@ open class PenyiramanRepository @Inject constructor(
 
     }
 
-    open suspend fun setPengaduk(data: String, nilai: Int) : Resource<Unit> {
+    open suspend fun setPengaduk(data: String, nilai: Int): Resource<Unit> {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
         val ref = db.reference.child("AgroGonta").child("gh1").child("pengaduk").child(data)
@@ -226,7 +231,7 @@ open class PenyiramanRepository @Inject constructor(
     }
 
 
-    open suspend fun setSaluran(data: String, nilai: Int) : Resource<Unit> {
+    open suspend fun setSaluran(data: String, nilai: Int): Resource<Unit> {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
         //set 0 all selenoid
@@ -250,10 +255,12 @@ open class PenyiramanRepository @Inject constructor(
     }
 
 
-    open suspend fun updateStatus(status : Boolean,id : String) : Resource<Unit> {
+    open suspend fun updateStatus(status: Boolean, id: String): Resource<Unit> {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
-        val ref = db.reference.child("AgroGonta").child("gh1").child("penyiraman_otomatis").child(id).child("status")
+        val ref =
+            db.reference.child("AgroGonta").child("gh1").child("penyiraman_otomatis").child(id)
+                .child("status")
 
 
         return try {
@@ -264,7 +271,11 @@ open class PenyiramanRepository @Inject constructor(
         }
     }
 
-    open  suspend fun setPenyiramanOtomatis(waktu : Long, durasi : Long, status : Boolean): Resource<String>? {
+    open suspend fun setPenyiramanOtomatis(
+        waktu: Long,
+        durasi: Long,
+        status: Boolean
+    ): Resource<String>? {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
         val ref = db.reference.child("AgroGonta").child("gh1").child("penyiraman_otomatis")
@@ -277,7 +288,7 @@ open class PenyiramanRepository @Inject constructor(
                 "waktu" to waktu,
                 "durasi" to durasi,
                 "status" to status,
-                )
+            )
 
             val result = ref.child(key).setValue(sendData).await()
             Resource.Success(key)
@@ -287,25 +298,7 @@ open class PenyiramanRepository @Inject constructor(
     }
 
 
-    open suspend fun getMode(): Resource<String> {
-        val db =
-            FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
-        val ref = db.reference.child("AgroGonta").child("gh1").child("mode_penyiraman")
-
-        return try {
-            val mode = ref.get().await() // Gunakan `.await()` untuk Firebase Tasks
-            val modePenyiraman = mode.value as? String // Pastikan data adalah String
-            if (modePenyiraman != null) {
-                Resource.Success(modePenyiraman)
-            } else {
-                Resource.Error("Mode penyiraman tidak ditemukan")
-            }
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Terjadi kesalahan")
-        }
-    }
-
-    open  suspend fun setMode(status : String): Resource<Unit>? {
+    open suspend fun setMode(status: String): Resource<Unit>? {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
         val ref = db.reference.child("AgroGonta").child("gh1").child("mode_penyiraman")
@@ -329,11 +322,11 @@ open class PenyiramanRepository @Inject constructor(
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val result = mutableListOf<PenyiramanAutoModel>()
 
-                    for (childSnapshot in snapshot.children){
+                    for (childSnapshot in snapshot.children) {
                         val data = childSnapshot.getValue(PenyiramanAutoModel::class.java)
                         val id = childSnapshot.key
                         Log.d("dinda", "tes id : $id ")
-                        if (data!=null && id!=null){
+                        if (data != null && id != null) {
                             result.add(data.copy(id = id))
                         }
                     }
@@ -353,10 +346,11 @@ open class PenyiramanRepository @Inject constructor(
     }
 
 
-    open  suspend fun deletePenyiramanOtomatis(id : String): Resource<Unit>? {
+    open suspend fun deletePenyiramanOtomatis(id: String): Resource<Unit>? {
         val db =
             FirebaseDatabase.getInstance("https://smartfarming-greenhouse-default-rtdb.asia-southeast1.firebasedatabase.app/")
-        val ref = db.reference.child("AgroGonta").child("gh1").child("penyiraman_otomatis").child(id)
+        val ref =
+            db.reference.child("AgroGonta").child("gh1").child("penyiraman_otomatis").child(id)
 
         return try {
             val result = ref.removeValue().await()
