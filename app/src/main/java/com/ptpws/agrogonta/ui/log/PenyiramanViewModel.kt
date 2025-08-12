@@ -41,9 +41,6 @@ class PenyiramanViewModel() : ViewModel(){
     private val api = RetrofitClient.instance
 
     // MQTT Config
-    private val mqttBroker = "broker.hivemq.com"
-    private val mqttPort = 1883
-    private val mqttTopic = "myapp/switch" // ganti sesuai topic kamu
     private val topicJadwal = "AgroGonta/gh1/jadwal/gh1"
 
     // kontrol supaya tidak subscribe ganda

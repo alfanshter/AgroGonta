@@ -1,6 +1,5 @@
 package com.ptpws.agrogontafarm.ui.log
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,11 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.ptpws.agrogonta.data.penyiraman.DummyPenyiramanRepository
 import com.ptpws.agrogontafarm.R
-import com.ptpws.agrogontafarm.data.Resource
 import com.ptpws.agrogontafarm.ui.AppScreen
-import com.ptpws.agrogontafarm.ui.common.LoadingDialog
 import com.ptpws.agrogontafarm.ui.common.poppinsFamily
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -73,7 +68,7 @@ import java.time.format.DateTimeFormatter
 fun LogScreen(ghViewModel: GhViewModel, navController: NavController) {
     val showBottomSheet = remember { mutableStateOf(false) }
     val sheetPengaduk = remember { mutableStateOf(false) }
-    val sheetSaluran = remember { mutableStateOf(false) }
+    val sheetFlushing = remember { mutableStateOf(false) }
     val sheetFlushingBaris1 = remember { mutableStateOf(false) }
 
     val currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
@@ -258,7 +253,7 @@ fun LogScreen(ghViewModel: GhViewModel, navController: NavController) {
                             Spacer(modifier = Modifier.height(16.dp))
                             //lampu tanaman
                             Column(Modifier.clickable {
-                                sheetSaluran.value = true
+                                sheetFlushing.value = true
                             }) {
                                 Row(
 
@@ -493,244 +488,241 @@ fun LogScreen(ghViewModel: GhViewModel, navController: NavController) {
         }
 
 
-        KontrolPenyiraman(showBottomSheet = showBottomSheet, ghViewModel)
+//        KontrolPenyiraman(showBottomSheet = showBottomSheet, ghViewModel)
         KontrolPengaduk(showBottomSheet = sheetPengaduk, ghViewModel)
-        KontrolSaluran(showBottomSheet = sheetSaluran, ghViewModel)
+        KontrolFlushing(showBottomSheet = sheetFlushing, ghViewModel)
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun KontrolPenyiraman(
-    showBottomSheet: MutableState<Boolean>,
-    ghViewModel: GhViewModel
-) {
-
-
-    val penyiraman by ghViewModel.gh.collectAsState()
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-    var elapsedTime2 by remember { mutableStateOf(0L) }
-    var checked2 by remember { mutableStateOf(penyiraman.penyiramanModel.baris2 == 1) }
-    var checked by remember { mutableStateOf(penyiraman.penyiramanModel.baris1 == 1) }
-    val scope = rememberCoroutineScope()
-
-
-    // Function to start the timer
-    fun startTimer2(timer: String) {
-        scope.launch {
-            var startTime = System.currentTimeMillis()
-            while (checked2) {
-                val currentTime = System.currentTimeMillis()
-                elapsedTime2 += (currentTime - startTime)
-                startTime = currentTime
-                delay(1) // Delay for 1 millisecond
-            }
-        }
-    }
-
-    // Function to stop the timer
-    fun stopTimer2() {
-        scope.coroutineContext.cancelChildren()
-    }
-
-    // Content of your ModalBottomSheet
-
-
-    // Handle switch 2 change
-    LaunchedEffect(checked2) {
-        ghViewModel.setsiram("baris2", if (checked2) 1 else 0)
-        if (checked2) {
-            startTimer2("baris2")
-        } else {
-            elapsedTime2 = 0L
-            stopTimer2()
-        }
-    }
-
-    if (showBottomSheet.value) {
-        ModalBottomSheet(
-            onDismissRequest = {
-                showBottomSheet.value = false
-            },
-            sheetState = sheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.White)
-            ) {
-                // Sheet content
-                Spacer(modifier = Modifier.height(30.dp))
-                Text(
-                    text = "Penyiraman",
-                    color = Color.Black,
-                    fontSize = 32.sp,
-                    fontFamily = poppinsFamily,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 80.dp, end = 80.dp, top = 51.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(10.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Baris 1",
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            fontFamily = poppinsFamily,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.clickable {
-                                ghViewModel.setsiram("baris1", 1)
-
-                            }
-                        )
-
-                        Divider(
-                            thickness = 1.dp, modifier = Modifier
-                                .rotate(90f)
-                                .width(40.dp)
-                                .padding(vertical = 16.dp)
-                        )
-
-
-                        //baris 1
-                        Switch(
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = colorResource(id = R.color.white),
-                                checkedTrackColor = colorResource(id = R.color.hijau),
-                                uncheckedThumbColor = colorResource(id = R.color.white),
-                                uncheckedTrackColor = Color.LightGray,
-                            ),
-                            checked = checked,
-                            onCheckedChange = {
-                                checked = it
-                            },
-                            thumbContent = if (checked) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(SwitchDefaults.IconSize)
-                                    )
-                                }
-                            } else {
-                                null
-                            }
-                        )
-
-                        setsiram(ghViewModel, checked)
-
-
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(17.dp))
-
-                waktuBerjalan(checked, ghViewModel)
-
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 80.dp, end = 80.dp, top = 25.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(10.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Baris 2",
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            fontFamily = poppinsFamily,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Divider(
-                            thickness = 1.dp, modifier = Modifier
-                                .rotate(90f)
-                                .width(40.dp)
-                                .padding(vertical = 16.dp)
-                        )
-
-
-                        Switch(
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = colorResource(id = R.color.white),
-                                checkedTrackColor = colorResource(id = R.color.hijau),
-
-                                uncheckedThumbColor = colorResource(id = R.color.white),
-                                uncheckedTrackColor = Color.LightGray,
-                            ),
-                            checked = checked2,
-                            onCheckedChange = {
-                                checked2 = it
-                            },
-                            thumbContent = if (checked2) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(SwitchDefaults.IconSize)
-                                    )
-                                    ghViewModel.setsiram("baris2", 1)
-                                }
-
-                            } else {
-                                ghViewModel.setsiram("baris2", 0)
-                                null
-                            }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(17.dp))
-
-                waktuBerjalan(checked2, ghViewModel)
-
-
-                Spacer(modifier = Modifier.height(65.dp))
-                Text(
-                    text = "Lihat tips budidaya",
-                    color = Color(0xff0C9359),
-                    fontSize = 18.sp,
-                    fontFamily = poppinsFamily,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 57.dp),
-                )
-
-            }
-        }
-    }
-
-
-}
+//
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun KontrolPenyiraman(
+//    showBottomSheet: MutableState<Boolean>,
+//    ghViewModel: GhViewModel
+//) {
+//
+//
+//    val penyiraman by ghViewModel.gh.collectAsState()
+//    val sheetState = rememberModalBottomSheetState(
+//        skipPartiallyExpanded = true
+//    )
+//    var elapsedTime2 by remember { mutableStateOf(0L) }
+////    var checked2 by remember { mutableStateOf(penyiraman.penyiramanModel.baris2 == 1) }
+////    var checked by remember { mutableStateOf(penyiraman.penyiramanModel.baris1 == 1) }
+//    val scope = rememberCoroutineScope()
+//
+//
+//    // Function to start the timer
+//    fun startTimer2(timer: String) {
+//        scope.launch {
+//            var startTime = System.currentTimeMillis()
+//            while (checked2) {
+//                val currentTime = System.currentTimeMillis()
+//                elapsedTime2 += (currentTime - startTime)
+//                startTime = currentTime
+//                delay(1) // Delay for 1 millisecond
+//            }
+//        }
+//    }
+//
+//    // Function to stop the timer
+//    fun stopTimer2() {
+//        scope.coroutineContext.cancelChildren()
+//    }
+//
+//    // Content of your ModalBottomSheet
+//
+//
+//    // Handle switch 2 change
+//    LaunchedEffect(checked2) {
+////        ghViewModel.setsiram("baris2", if (checked2) 1 else 0)
+//        if (checked2) {
+//            startTimer2("baris2")
+//        } else {
+//            elapsedTime2 = 0L
+//            stopTimer2()
+//        }
+//    }
+//
+//    if (showBottomSheet.value) {
+//        ModalBottomSheet(
+//            onDismissRequest = {
+//                showBottomSheet.value = false
+//            },
+//            sheetState = sheetState
+//        ) {
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .background(color = Color.White)
+//            ) {
+//                // Sheet content
+//                Spacer(modifier = Modifier.height(30.dp))
+//                Text(
+//                    text = "Penyiraman",
+//                    color = Color.Black,
+//                    fontSize = 32.sp,
+//                    fontFamily = poppinsFamily,
+//                    fontWeight = FontWeight.Medium,
+//                    modifier = Modifier.fillMaxWidth(),
+//                    textAlign = TextAlign.Center
+//                )
+//                Card(
+//                    shape = RoundedCornerShape(12.dp),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(start = 80.dp, end = 80.dp, top = 51.dp),
+//                    colors = CardDefaults.cardColors(containerColor = Color.White),
+//                    elevation = CardDefaults.cardElevation(10.dp)
+//                ) {
+//                    Row(
+//                        horizontalArrangement = Arrangement.SpaceBetween,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        modifier = Modifier
+//                            .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
+//                            .fillMaxWidth()
+//                    ) {
+//                        Text(
+//                            text = "Baris 1",
+//                            color = Color.Black,
+//                            fontSize = 16.sp,
+//                            fontFamily = poppinsFamily,
+//                            fontWeight = FontWeight.Bold,
+//                            textAlign = TextAlign.Center,
+//                            modifier = Modifier.clickable {
+////                                ghViewModel.setsiram("baris1", 1)
+//
+//                            }
+//                        )
+//
+//                        Divider(
+//                            thickness = 1.dp, modifier = Modifier
+//                                .rotate(90f)
+//                                .width(40.dp)
+//                                .padding(vertical = 16.dp)
+//                        )
+//
+//
+//                        //baris 1
+//                        Switch(
+//                            colors = SwitchDefaults.colors(
+//                                checkedThumbColor = colorResource(id = R.color.white),
+//                                checkedTrackColor = colorResource(id = R.color.hijau),
+//                                uncheckedThumbColor = colorResource(id = R.color.white),
+//                                uncheckedTrackColor = Color.LightGray,
+//                            ),
+//                            checked = checked,
+//                            onCheckedChange = {
+//                                checked = it
+//                            },
+//                            thumbContent = if (checked) {
+//                                {
+//                                    Icon(
+//                                        imageVector = Icons.Filled.Check,
+//                                        contentDescription = null,
+//                                        modifier = Modifier
+//                                            .size(SwitchDefaults.IconSize)
+//                                    )
+//                                }
+//                            } else {
+//                                null
+//                            }
+//                        )
+//
+////                        setsiram(ghViewModel, checked)
+//
+//
+//                    }
+//                }
+//
+//                Spacer(modifier = Modifier.height(17.dp))
+//
+////                waktuBerjalan(checked, ghViewModel)
+//
+//                Card(
+//                    shape = RoundedCornerShape(12.dp),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(start = 80.dp, end = 80.dp, top = 25.dp),
+//                    colors = CardDefaults.cardColors(containerColor = Color.White),
+//                    elevation = CardDefaults.cardElevation(10.dp)
+//                ) {
+//                    Row(
+//                        horizontalArrangement = Arrangement.SpaceBetween,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        modifier = Modifier
+//                            .padding(start = 30.dp, end = 23.dp, top = 12.dp, bottom = 12.dp)
+//                            .fillMaxWidth()
+//                    ) {
+//                        Text(
+//                            text = "Baris 2",
+//                            color = Color.Black,
+//                            fontSize = 16.sp,
+//                            fontFamily = poppinsFamily,
+//                            fontWeight = FontWeight.Bold,
+//                            textAlign = TextAlign.Center
+//                        )
+//
+//                        Divider(
+//                            thickness = 1.dp, modifier = Modifier
+//                                .rotate(90f)
+//                                .width(40.dp)
+//                                .padding(vertical = 16.dp)
+//                        )
+//
+//
+//                        Switch(
+//                            colors = SwitchDefaults.colors(
+//                                checkedThumbColor = colorResource(id = R.color.white),
+//                                checkedTrackColor = colorResource(id = R.color.hijau),
+//
+//                                uncheckedThumbColor = colorResource(id = R.color.white),
+//                                uncheckedTrackColor = Color.LightGray,
+//                            ),
+//                            checked = checked2,
+//                            onCheckedChange = {
+//                                checked2 = it
+//                            },
+//                            thumbContent = if (checked2) {
+//                                {
+//                                    Icon(
+//                                        imageVector = Icons.Filled.Check,
+//                                        contentDescription = null,
+//                                        modifier = Modifier
+//                                            .size(SwitchDefaults.IconSize)
+//                                    )
+////                                    ghViewModel.setsiram("baris2", 1)
+//                                }
+//
+//                            } else {
+////                                ghViewModel.setsiram("baris2", 0)
+//                                null
+//                            }
+//                        )
+//                    }
+//                }
+//
+//                Spacer(modifier = Modifier.height(17.dp))
+//
+//                Spacer(modifier = Modifier.height(65.dp))
+//                Text(
+//                    text = "Lihat tips budidaya",
+//                    color = Color(0xff0C9359),
+//                    fontSize = 18.sp,
+//                    fontFamily = poppinsFamily,
+//                    fontWeight = FontWeight.Bold,
+//                    textAlign = TextAlign.Center,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(bottom = 57.dp),
+//                )
+//
+//            }
+//        }
+//    }
+//
+//
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -738,16 +730,26 @@ fun KontrolPengaduk(
     showBottomSheet: MutableState<Boolean>,
     ghViewModel: GhViewModel
 ) {
+    //timer penyiraman
+    var elapsedTime by remember { mutableStateOf(0L) } // detik
+    var timerRunning by remember { mutableStateOf(false) }
 
 
-    val penyiraman by ghViewModel.gh.collectAsState()
     val sheetState = rememberModalBottomSheetState()
-
     var checked by remember { mutableStateOf(false) }
+    val switchState = ghViewModel.switchState
 
-    // Observe the changes in tongbesar and update the checked state
-    LaunchedEffect(penyiraman.pengadukModel.tongbesar) {
-        checked = penyiraman.pengadukModel.tongbesar == 1
+    LaunchedEffect(switchState) {
+        if (switchState) {
+            timerRunning = true
+            while (timerRunning) {
+                delay(1000)
+                elapsedTime += 1
+            }
+        } else {
+            timerRunning = false
+            elapsedTime = 0 // kalau mau reset ke 0
+        }
     }
 
     if (showBottomSheet.value) {
@@ -814,12 +816,11 @@ fun KontrolPengaduk(
                                 uncheckedThumbColor = colorResource(id = R.color.white),
                                 uncheckedTrackColor = Color.LightGray,
                             ),
-                            checked = checked,
-                            onCheckedChange = {
-                                checked = it
-                                setpengaduk(ghViewModel, checked)
+                            checked = switchState,
+                            onCheckedChange = { newState ->
+                                ghViewModel.updateSwitchState(newState)
                             },
-                            thumbContent = if (checked) {
+                            thumbContent = if (switchState) {
                                 {
                                     Icon(
                                         imageVector = Icons.Filled.Check,
@@ -833,15 +834,22 @@ fun KontrolPengaduk(
                             }
                         )
 
-//                        setpengaduk(ghViewModel, checked)
-
 
                     }
                 }
 
                 Spacer(modifier = Modifier.height(17.dp))
-
-                waktuBerjalan(checked, ghViewModel)
+                if (switchState) {
+                    Text(
+                        text = "Waktu berjalan: ${formatTime(elapsedTime)}",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        fontFamily = poppinsFamily,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(65.dp))
                 Text(
@@ -866,20 +874,31 @@ fun KontrolPengaduk(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KontrolSaluran(
+fun KontrolFlushing(
     showBottomSheet: MutableState<Boolean>,
     ghViewModel: GhViewModel
 ) {
 
+    //timer penyiraman
+    var elapsedTime by remember { mutableStateOf(0L) } // detik
+    var timerRunning by remember { mutableStateOf(false) }
 
-    val saluran by ghViewModel.gh.collectAsState()
+
     val sheetState = rememberModalBottomSheetState()
-
     var checked by remember { mutableStateOf(false) }
+    val switchState = ghViewModel.switchStateFlushing
 
-    // Observe the changes in tongbesar and update the checked state
-    LaunchedEffect(saluran.saluranmodel.saluran) {
-        checked = saluran.saluranmodel.saluran == 1
+    LaunchedEffect(switchState) {
+        if (switchState) {
+            timerRunning = true
+            while (timerRunning) {
+                delay(1000)
+                elapsedTime += 1
+            }
+        } else {
+            timerRunning = false
+            elapsedTime = 0 // kalau mau reset ke 0
+        }
     }
 
     if (showBottomSheet.value) {
@@ -897,7 +916,7 @@ fun KontrolSaluran(
                 // Sheet content
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
-                    text = "Saluran",
+                    text = "Pengaduk",
                     color = Color.Black,
                     fontSize = 32.sp,
                     fontFamily = poppinsFamily,
@@ -921,7 +940,7 @@ fun KontrolSaluran(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "Sumber",
+                            text = "Tong Besar",
                             color = Color.Black,
                             fontSize = 16.sp,
                             fontFamily = poppinsFamily,
@@ -946,12 +965,11 @@ fun KontrolSaluran(
                                 uncheckedThumbColor = colorResource(id = R.color.white),
                                 uncheckedTrackColor = Color.LightGray,
                             ),
-                            checked = checked,
-                            onCheckedChange = {
-                                checked = it
-                                setSaluran(ghViewModel, checked)
+                            checked = switchState,
+                            onCheckedChange = { newState ->
+                                ghViewModel.updateSwitchStateFlushing(newState)
                             },
-                            thumbContent = if (checked) {
+                            thumbContent = if (switchState) {
                                 {
                                     Icon(
                                         imageVector = Icons.Filled.Check,
@@ -965,28 +983,25 @@ fun KontrolSaluran(
                             }
                         )
 
-//                        setpengaduk(ghViewModel, checked)
-
 
                     }
                 }
 
                 Spacer(modifier = Modifier.height(17.dp))
 
+                if (switchState) {
+                    Text(
+                        text = "Waktu berjalan: ${formatTime(elapsedTime)}",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        fontFamily = poppinsFamily,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
-                waktuBerjalan(checked, ghViewModel)
-
-                Text(
-                    text = "Water level 30% - Sedikit",
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = poppinsFamily,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 57.dp),
-                )
+                Spacer(modifier = Modifier.height(65.dp))
                 Text(
                     text = "Lihat tips budidaya",
                     color = Color(0xff0C9359),
@@ -1008,106 +1023,6 @@ fun KontrolSaluran(
 
 
 @Composable
-fun waktuBerjalan(checked: Boolean, ghViewModel: GhViewModel) {
-
-    val penyiramanState by ghViewModel.setPenyiraman.collectAsState()
-
-    var showLoading = remember { mutableStateOf(true) }
-    val context = LocalContext.current
-
-    when (penyiramanState) {
-
-        is Resource.Loading -> {
-            showLoading.value = true
-
-        }
-
-        is Resource.Success -> {
-            showLoading.value = false
-
-        }
-
-        is Resource.Error -> {
-            showLoading.value = false
-            val message = (penyiramanState as Resource.Error).message
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-
-        }
-
-        else -> {
-            showLoading.value = false
-        }
-    }
-
-
-    if (showLoading.value) {
-        LoadingDialog(showDialog = showLoading)
-    }
-
-    val scope = rememberCoroutineScope()
-    var elapsedTime by remember { mutableStateOf(0L) }
-
-    // Function to start the timer
-    fun startTimer(timer: String) {
-        scope.launch {
-            var startTime = System.currentTimeMillis()
-            while (checked) {
-                val currentTime = System.currentTimeMillis()
-                elapsedTime += (currentTime - startTime)
-                startTime = currentTime
-                delay(1) // Delay for 1 millisecond
-            }
-        }
-    }
-
-    // Function to stop the timer
-    fun stopTimer() {
-        scope.coroutineContext.cancelChildren()
-    }
-
-    LaunchedEffect(checked) {
-        if (checked) {
-            startTimer("baris1")
-        } else {
-            elapsedTime = 0L
-            stopTimer()
-        }
-    }
-    Text(
-        text = formatTime(milliseconds = elapsedTime),
-        color = Color(0xff06492C),
-        fontSize = 16.sp,
-        fontFamily = poppinsFamily,
-        fontWeight = FontWeight.Bold,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-
-fun setsiram(ghViewModel: GhViewModel, checked: Boolean) {
-    ghViewModel.setsiram("baris1", if (checked == true) 1 else 0)
-}
-
-fun setpengaduk(ghViewModel: GhViewModel, checked: Boolean) {
-    ghViewModel.setPengaduk("tongbesar", if (checked == true) 1 else 0)
-}
-
-fun setSaluran(ghViewModel: GhViewModel, checked: Boolean) {
-    ghViewModel.setSaluran("tandon_a", if (checked == true) 1 else 0)
-}
-
-fun setFlushingBaris1(ghViewModel: GhViewModel, checked: Boolean) {
-    ghViewModel.setFlushing("baris1", if (checked == true) 1 else 0)
-}
-
-fun setFlushingBaris2(ghViewModel: GhViewModel, checked: Boolean) {
-    ghViewModel.setFlushing("baris2", if (checked == true) 1 else 0)
-}
-
-
-
-@Composable
 fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60
     val minutes = (milliseconds / (1000 * 60)) % 60
@@ -1121,15 +1036,15 @@ fun formatTime(milliseconds: Long): String {
 @Preview
 @Composable
 fun LogScreenPrev() {
-    val dummyModel = GhViewModel(DummyPenyiramanRepository())
+    val dummyModel = GhViewModel()
     LogScreen(ghViewModel = dummyModel, rememberNavController())
 }
 
 @Preview
 @Composable
 fun KontrolPenyiramanPrev() {
-    val dummyModel = GhViewModel(DummyPenyiramanRepository())
-    KontrolPenyiraman(ghViewModel = dummyModel, showBottomSheet = remember { mutableStateOf(true) })
+    val dummyModel = GhViewModel()
+//    KontrolPenyiraman(ghViewModel = dummyModel, showBottomSheet = remember { mutableStateOf(true) })
 }
 
 
