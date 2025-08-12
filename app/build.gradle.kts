@@ -41,6 +41,11 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources {
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "META-INF/INDEX.LIST"        }
+    }
 }
 
 
@@ -156,6 +161,8 @@ dependencies {
     implementation(libs.androidx.media3.ui)
 
     implementation(libs.core)
+
+    implementation("com.hivemq:hivemq-mqtt-client:1.3.7")
 
 
     implementation (libs.androidx.datastore.preferences.v111)

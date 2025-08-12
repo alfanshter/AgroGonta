@@ -1,15 +1,24 @@
 package com.ptpws.agrogontafarm.data.penyiraman
 
+import android.content.Context
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.ptpws.agrogonta.ui.log.penyiraman.convertTimestamp
+import com.hivemq.client.mqtt.MqttClient
+import com.hivemq.client.mqtt.MqttClientSslConfig
+import com.hivemq.client.mqtt.datatypes.MqttQos
+import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
+import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
+import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth
+import com.ptpws.agrogonta.utils.Constant
 import com.ptpws.agrogontafarm.data.Resource
 import com.ptpws.agrogontafarm.data.models.GhModel
 import com.ptpws.agrogontafarm.data.models.PenyiramanAutoModel
 import com.ptpws.agrogontafarm.data.models.PenyiramanModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
@@ -19,7 +28,9 @@ import javax.inject.Inject
 import kotlin.collections.HashMap
 import kotlin.coroutines.resume
 
-open class PenyiramanRepository @Inject constructor() {
+open class PenyiramanRepository @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     val _penyiraman = MutableStateFlow(PenyiramanModel())
     open val penyiraman: StateFlow<PenyiramanModel> get() = _penyiraman
 
@@ -28,6 +39,65 @@ open class PenyiramanRepository @Inject constructor() {
 
     val _modePenyiraman = MutableStateFlow("")
     open val modePenyiraman: StateFlow<String> get() = _modePenyiraman
+
+
+    private val _lastMessage = MutableStateFlow<String?>(null)
+    val lastMessage: StateFlow<String?> get() = _lastMessage
+
+    val sslConfig = MqttClientSslConfig.builder()
+        .hostnameVerifier { _, _ -> true } // Untuk testing, sebaiknya ganti dengan verifikasi aman
+        .build()
+
+    private val mqttClient: Mqtt3AsyncClient by lazy {
+        MqttClient.builder()
+            .useMqttVersion3()
+            .identifier("android-client-${System.currentTimeMillis()}")
+            .serverHost(Constant.brokerUri)
+            .serverPort(8883)
+            .sslConfig(sslConfig)
+            .buildAsync()
+    }
+
+    fun connect() {
+        // Auth
+        val simpleAuth = Mqtt3SimpleAuth.builder()
+            .username("alfanshter")
+            .password("Alfan@Dinda123".toByteArray())
+            .build()
+
+        mqttClient.connectWith()
+            .simpleAuth(simpleAuth)
+            .send()
+            .whenComplete { _, throwable ->
+                if (throwable != null) {
+                    println("❌ MQTT connect error: ${throwable.message}")
+                } else {
+                    println("✅ Connected to broker")
+                    subscribe(Constant.penyiramanCommand)
+                }
+            }
+    }
+
+    private fun subscribe(topic: String) {
+        mqttClient.subscribeWith()
+            .topicFilter(topic)
+            .qos(MqttQos.AT_LEAST_ONCE)
+            .callback { publish ->
+                val payloadString = publish.payloadAsBytes?.decodeToString() ?: ""
+                println("📩 Received from $topic: $payloadString")
+                _lastMessage.value = payloadString // Simpan ke StateFlow
+            }
+            .send()
+    }
+
+    fun sendCommand(command: String) {
+        mqttClient.publishWith()
+            .topic(Constant.penyiramanCommand)
+            .qos(MqttQos.AT_LEAST_ONCE)
+            .payload(command.toByteArray())
+            .send()
+    }
+
 
     open suspend fun getPenyiraman() {
         val db =

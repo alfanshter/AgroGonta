@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,12 +53,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.composables.core.rememberDialogState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ptpws.agrogonta.data.penyiraman.DummyPenyiramanRepository
 import com.ptpws.agrogonta.ui.common.CustomTimePickerDialog
 import com.ptpws.agrogonta.ui.common.ErrorDialog
+import com.ptpws.agrogonta.utils.Constant
 import com.ptpws.agrogontafarm.R
 import com.ptpws.agrogontafarm.data.Resource
 import com.ptpws.agrogontafarm.data.models.PenyiramanAutoModel
@@ -74,7 +77,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun PenyiramanScreen(penyiramanViewModel: PenyiramanViewModel) {
+fun PenyiramanScreen(penyiramanViewModel: PenyiramanViewModel ) {
 
 
     val penyiraman by penyiramanViewModel.gh.collectAsState()
@@ -122,6 +125,10 @@ fun PenyiramanScreen(penyiramanViewModel: PenyiramanViewModel) {
     val penyiramanOtomatisState by penyiramanViewModel.penyiramanOtomatis.collectAsState()
     val isRefreshing by penyiramanViewModel.isRefreshing.collectAsState() // State untuk loading
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+
+
+    val statusPompa by penyiramanViewModel.lastMessage.collectAsState()
+
 
     SwipeRefresh(
         state = swipeRefreshState,

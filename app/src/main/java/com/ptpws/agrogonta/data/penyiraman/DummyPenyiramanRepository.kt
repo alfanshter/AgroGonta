@@ -1,5 +1,7 @@
 package com.ptpws.agrogonta.data.penyiraman
 
+import android.app.Application
+import android.content.Context
 import com.ptpws.agrogonta.data.models.WeatherResponse
 import com.ptpws.agrogonta.data.repo.WeatherRepository
 import com.ptpws.agrogontafarm.data.Resource
@@ -12,7 +14,7 @@ import com.ptpws.agrogontafarm.data.penyiraman.PenyiramanRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class DummyPenyiramanRepository : PenyiramanRepository() {
+class DummyPenyiramanRepository : PenyiramanRepository(mockContext()) {
     // Override StateFlow untuk memberikan data dummy
     override val penyiraman: StateFlow<PenyiramanModel> = MutableStateFlow(PenyiramanModel(0, 0))
     override val gh: StateFlow<GhModel> = MutableStateFlow(GhModel(PengadukModel(0, 0, 0, 0),
@@ -51,5 +53,11 @@ class DummyPenyiramanRepository : PenyiramanRepository() {
         return Resource.Success(Unit)
     }
 
+    companion object {
+        // Buat context palsu biar constructor induk tetap terpenuhi
+        private fun mockContext(): Context {
+            return Application()
 
+        }
+    }
 }

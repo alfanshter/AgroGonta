@@ -1,5 +1,7 @@
 package com.ptpws.agrogontafarm.ui.log
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ptpws.agrogonta.ui.log.penyiraman.convertTimestamp
@@ -51,13 +53,24 @@ class PenyiramanViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
+
+    val lastMessage: StateFlow<String?> get() = penyiramanRepository.lastMessage
+
     init {
         viewModelScope.launch {
-            penyiramanRepository.getPenyiraman()
-            fetchModePenyiraman()
-            getPenyiramanOtomatis()
+            penyiramanRepository.connect()
         }
     }
+
+
+    fun turnPumpOn() {
+        penyiramanRepository.sendCommand("ON")
+    }
+
+    fun turnPumpOff() {
+        penyiramanRepository.sendCommand("OFF")
+    }
+
 
     fun refreshData() {
         viewModelScope.launch {

@@ -1,5 +1,6 @@
 package com.ptpws.agrogontafarm.di
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.ptpws.agrogonta.api.WeatherApi
@@ -12,6 +13,7 @@ import com.ptpws.agrogontafarm.data.penyiraman.PenyiramanRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -37,9 +39,11 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun providePenyiramanRepository(): PenyiramanRepository {
+    fun providePenyiramanRepository(
+        @ApplicationContext context: Context
+    ): PenyiramanRepository {
         // Berikan implementasi repository asli atau mock di sini
-        return PenyiramanRepository() // Firebase implementation
+        return PenyiramanRepository(context) // Firebase implementation
     }
 
     @Singleton
